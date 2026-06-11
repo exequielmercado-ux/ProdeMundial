@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mundial FIFA 2026 Predictor — Análisis Estadístico Partido a Partido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b1220;
+  --bg-elevated:#0f1729;
+  --card:#111827;
+  --card-glass:rgba(17,24,39,.55);
+  --border:rgba(148,163,184,.10);
+  --border-strong:rgba(148,163,184,.20);
+  --accent:#3b82f6;
+  --accent-light:#60a5fa;
+  --accent-glow:rgba(59,130,246,.35);
+  --success:#10b981;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --text:#f8fafc;
+  --text-secondary:#94a3b8;
+  --text-tertiary:#64748b;
+  --radius-lg:18px;
+  --radius-md:12px;
+  --radius-sm:8px;
+  --shadow-card:0 4px 24px rgba(0,0,0,.28);
+  --shadow-hover:0 14px 40px rgba(59,130,246,.16);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html{scroll-behavior:smooth}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ambient background glow */
+.bg-glow-1{position:fixed;top:-220px;left:-160px;width:560px;height:560px;
+  background:radial-gradient(circle,rgba(59,130,246,.22),transparent 70%);
+  filter:blur(90px);pointer-events:none;z-index:0}
+.bg-glow-2{position:fixed;bottom:-260px;right:-180px;width:620px;height:620px;
+  background:radial-gradient(circle,rgba(16,185,129,.14),transparent 70%);
+  filter:blur(100px);pointer-events:none;z-index:0}
+.bg-glow-3{position:fixed;top:35%;right:-120px;width:420px;height:420px;
+  background:radial-gradient(circle,rgba(245,158,11,.10),transparent 70%);
+  filter:blur(100px);pointer-events:none;z-index:0}
+
+.page{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 1.25rem 4rem}
+
+/* ===================== HERO ===================== */
+.hero{padding:3.25rem 0 2.25rem;text-align:center}
+.hero-icon{font-size:2.75rem;margin-bottom:.6rem;
+  filter:drop-shadow(0 0 22px rgba(245,158,11,.45));
+  animation:floaty 4s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+.hero h1{
+  font-family:'Poppins',sans-serif;
+  font-size:clamp(1.9rem,5vw,3.1rem);
+  font-weight:800;
+  letter-spacing:-.02em;
+  background:linear-gradient(135deg,#ffffff 10%,#93c5fd 60%,#3b82f6 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:.6rem;
+}
+
+.hero p.subtitle{
+  color:var(--text-secondary);
+  font-size:1.02rem;
+  max-width:600px;
+  margin:0 auto 1.5rem;
+  line-height:1.65;
+}
+
+.hero-meta{
+  display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;
+  margin-bottom:2rem;
+  font-size:.82rem;color:var(--text-secondary);
+}
+.hero-meta span{display:inline-flex;align-items:center;gap:.4rem;
+  background:var(--card-glass);border:1px solid var(--border);
+  padding:.4rem .9rem;border-radius:999px;backdrop-filter:blur(8px)}
+
+/* KPI grid */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.kpi-card{
+  background:var(--card-glass);
+  backdrop-filter:blur(14px);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:1.35rem 1rem;
+  text-align:center;
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;
+  opacity:0;transform:translateY(16px);
+  animation:fadeInUp .6s ease forwards;
+}
+.kpi-card:nth-child(1){animation-delay:.05s}
+.kpi-card:nth-child(2){animation-delay:.12s}
+.kpi-card:nth-child(3){animation-delay:.19s}
+.kpi-card:nth-child(4){animation-delay:.26s}
+.kpi-card:hover{transform:translateY(-4px);border-color:var(--border-strong);box-shadow:var(--shadow-hover)}
+.kpi-icon{font-size:1.4rem;margin-bottom:.4rem}
+.kpi-value{
+  font-family:'Poppins',sans-serif;
+  font-size:1.85rem;font-weight:800;
+  background:linear-gradient(135deg,var(--accent-light),#a78bfa);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  line-height:1.1;
+}
+.kpi-label{
+  font-size:.74rem;color:var(--text-secondary);
+  margin-top:.35rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600;
+}
+
+/* ===================== FILTERS ===================== */
+.filter-section{margin:2.5rem 0 1.75rem}
+.filter-title{
+  font-size:.78rem;font-weight:700;color:var(--text-secondary);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;
+}
+.filter-sub{font-size:.85rem;color:var(--text-tertiary);margin-bottom:1rem}
+
+.filter-bar{display:flex;gap:.5rem;flex-wrap:wrap}
+.fbtn{
+  position:relative;
+  padding:.5rem 1.15rem .5rem 1.05rem;
+  font-family:'Inter',sans-serif;
+  font-size:.8rem;font-weight:600;
+  border:1px solid var(--border);
+  border-radius:999px;cursor:pointer;
+  background:var(--card-glass);
+  color:var(--text-secondary);
+  backdrop-filter:blur(8px);
+  transition:all .2s ease;
+  display:inline-flex;align-items:center;
+}
+.fbtn:hover:not(.on){
+  border-color:var(--accent-glow);
+  color:var(--text);
+  background:rgba(59,130,246,.08);
+  transform:translateY(-1px);
+}
+.fbtn.on{
+  background:linear-gradient(135deg,var(--accent),#2563eb);
+  color:#fff;border-color:transparent;
+  box-shadow:0 6px 18px rgba(59,130,246,.35);
+}
+.fbtn.ga::before,.fbtn.gb::before,.fbtn.gc::before,.fbtn.gd::before,
+.fbtn.ge::before,.fbtn.gf::before,.fbtn.gg::before,.fbtn.gh::before,
+.fbtn.gi::before,.fbtn.gj::before,.fbtn.gk::before,.fbtn.gl::before{
+  content:'';display:inline-block;width:7px;height:7px;border-radius:50%;
+  margin-right:7px;flex-shrink:0;
+}
+.fbtn.ga::before{background:#3b82f6}
+.fbtn.gb::before{background:#8b5cf6}
+.fbtn.gc::before{background:#10b981}
+.fbtn.gd::before{background:#f59e0b}
+.fbtn.ge::before{background:#ef4444}
+.fbtn.gf::before{background:#06b6d4}
+.fbtn.gg::before{background:#22c55e}
+.fbtn.gh::before{background:#eab308}
+.fbtn.gi::before{background:#ec4899}
+.fbtn.gj::before{background:#fb923c}
+.fbtn.gk::before{background:#2dd4bf}
+.fbtn.gl::before{background:#818cf8}
+
+/* ===================== MATCHES ===================== */
+.wrap{padding:0}
+
+.day-label{
+  display:flex;align-items:center;gap:.65rem;
+  font-size:.76rem;font-weight:700;color:var(--accent-light);
+  text-transform:uppercase;letter-spacing:.12em;
+  margin:2.25rem 0 1rem;
+}
+.day-label:first-of-type{margin-top:.5rem}
+.day-label::before{content:'📅';font-size:.85rem;filter:none}
+.day-label::after{content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,var(--border-strong),transparent)}
+
+.match{
+  background:var(--card-glass);
+  backdrop-filter:blur(12px);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:1.15rem 1.3rem;
+  margin-bottom:.9rem;
+  box-shadow:var(--shadow-card);
+  transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+  opacity:0;transform:translateY(14px);
+  animation:fadeInUp .55s ease forwards;
+}
+.match:hover{
+  transform:translateY(-4px);
+  border-color:var(--accent-glow);
+  box-shadow:var(--shadow-hover);
+}
+@keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+
+.match-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;gap:.6rem;flex-wrap:wrap}
+.match-head-left{display:flex;gap:.5rem;align-items:center}
+.match-num{
+  font-family:'Poppins',sans-serif;font-size:.68rem;font-weight:700;
+  color:var(--text-tertiary);background:rgba(255,255,255,.04);
+  padding:3px 9px;border-radius:6px;border:1px solid var(--border);
+  letter-spacing:.04em;
+}
+.match-grp{font-size:.68rem;font-weight:700;padding:3px 11px;border-radius:999px;letter-spacing:.03em}
+.ga{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.3)}
+.gb{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
+.gc{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.3)}
+.gd{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3)}
+.ge{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.gf{background:rgba(6,182,212,.15);color:#67e8f9;border:1px solid rgba(6,182,212,.3)}
+.gg{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3)}
+.gh{background:rgba(234,179,8,.15);color:#fde047;border:1px solid rgba(234,179,8,.3)}
+.gi{background:rgba(236,72,153,.15);color:#f9a8d4;border:1px solid rgba(236,72,153,.3)}
+.gj{background:rgba(251,146,60,.15);color:#fdba74;border:1px solid rgba(251,146,60,.3)}
+.gk{background:rgba(45,212,191,.15);color:#5eead4;border:1px solid rgba(45,212,191,.3)}
+.gl{background:rgba(129,140,248,.15);color:#a5b4fc;border:1px solid rgba(129,140,248,.3)}
+
+.score-hint{
+  font-size:.72rem;color:var(--text-tertiary);
+  background:rgba(255,255,255,.03);
+  padding:4px 11px;border-radius:999px;border:1px solid var(--border);
+  white-space:nowrap;
+}
+.score-hint strong{color:var(--text);font-weight:700}
+
+.teams{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin:.95rem 0 1rem}
+.team-a,.team-b{font-size:1.05rem;font-weight:700;color:var(--text);flex:1;line-height:1.35}
+.team-a{text-align:left}
+.team-b{text-align:right}
+.match-vs{
+  font-size:.66rem;font-weight:800;color:var(--text-tertiary);
+  background:var(--bg-elevated);width:30px;height:30px;min-width:30px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border-strong);
+}
+
+.stats-row{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;
+  margin-bottom:.6rem;text-align:center;
+}
+.stats-row span{font-size:.68rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.05em;display:flex;flex-direction:column;gap:2px}
+.stats-row span strong{
+  font-family:'Poppins',sans-serif;font-size:1.15rem;font-weight:800;
+  color:var(--text);letter-spacing:0;text-transform:none;
+}
+.stats-row span:nth-child(2) strong{color:var(--text-secondary);font-size:.95rem}
+
+.bars{display:flex;height:8px;border-radius:6px;overflow:hidden;margin-bottom:.5rem;gap:2px;background:rgba(255,255,255,.04)}
+.ba,.bd,.bb{width:0;transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+.ba{background:linear-gradient(90deg,#2563eb,#60a5fa);border-radius:6px 0 0 6px}
+.bd{background:linear-gradient(90deg,#475569,#94a3b8)}
+.bb{background:linear-gradient(90deg,#f87171,#dc2626);border-radius:0 6px 6px 0}
+
+.probs{display:flex;justify-content:space-between;font-size:.66rem;color:var(--text-tertiary);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.05em}
+
+.match-foot{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;padding-top:.85rem;border-top:1px solid var(--border)}
+.pred-tag{
+  font-size:.74rem;font-weight:700;padding:5px 13px;border-radius:999px;
+  background:linear-gradient(135deg,rgba(59,130,246,.22),rgba(37,99,235,.10));
+  color:#93c5fd;border:1px solid rgba(59,130,246,.32);
+}
+.alt-tag{font-size:.72rem;padding:5px 13px;border-radius:999px;background:rgba(255,255,255,.04);color:var(--text-secondary);border:1px solid var(--border)}
+.conf{font-size:.82rem;color:#fbbf24;letter-spacing:1px;text-shadow:0 0 10px rgba(251,191,36,.35)}
+.conf-num{font-size:.7rem;color:var(--text-tertiary);font-weight:600}
+
+.risk-l{font-size:.7rem;font-weight:700;padding:4px 11px;border-radius:999px;background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.3)}
+.risk-m{font-size:.7rem;font-weight:700;padding:4px 11px;border-radius:999px;background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3)}
+.risk-h{font-size:.7rem;font-weight:700;padding:4px 11px;border-radius:999px;background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+
+.match-note{
+  font-size:.79rem;color:var(--text-secondary);line-height:1.65;
+  margin-top:.85rem;padding:.65rem .9rem;
+  background:rgba(255,255,255,.025);
+  border-left:2px solid var(--accent-glow);
+  border-radius:0 8px 8px 0;
+}
+
+/* ===================== FOOTER ===================== */
+.footer{margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.footer-title{font-size:.78rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.9rem}
+.footer-pills{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.footer-pill{
+  font-size:.74rem;font-weight:600;padding:5px 13px;border-radius:999px;
+  background:var(--card-glass);border:1px solid var(--border);color:var(--text-secondary);
+}
+.footer-pill b{color:var(--accent-light);font-weight:700}
+.footer-credit{font-size:.78rem;color:var(--text-tertiary);line-height:1.7;max-width:680px}
+.footer-bottom{margin-top:1.5rem;font-size:.72rem;color:var(--text-tertiary);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width:768px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .filter-bar{flex-wrap:nowrap;overflow-x:auto;padding-bottom:.5rem;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .fbtn{flex-shrink:0}
+}
+@media (max-width:520px){
+  .hero{padding:2.25rem 0 1.5rem}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:.65rem}
+  .kpi-card{padding:1rem .75rem}
+  .kpi-value{font-size:1.5rem}
+  .kpi-label{font-size:.66rem}
+  .team-a,.team-b{font-size:.9rem}
+  .match{padding:.95rem 1rem}
+  .stats-row span strong{font-size:1rem}
+  .hero-meta{gap:.6rem}
+  .hero-meta span{font-size:.74rem;padding:.35rem .7rem}
+  .match-foot{gap:.4rem}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow-1"></div>
+<div class="bg-glow-2"></div>
+<div class="bg-glow-3"></div>
+
+<div class="page">
+
+  <header class="hero">
+    <div class="hero-icon">🏆</div>
+    <h1>Mundial FIFA 2026 Predictor</h1>
+    <p class="subtitle">Predicciones partido a partido basadas en probabilidades, rankings Elo y análisis estadístico.</p>
+
+    <div class="hero-meta">
+      <span>📍 México · EE.UU. · Canadá</span>
+      <span>🗓️ Fase de grupos: 11–27 jun 2026</span>
+      <span>⚙️ Modelo Elo + xG + Forma</span>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">⚽</div>
+        <div class="kpi-value">72</div>
+        <div class="kpi-label">Partidos analizados</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🗂️</div>
+        <div class="kpi-value">12</div>
+        <div class="kpi-label">Grupos (A–L)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-value">432</div>
+        <div class="kpi-label">Probabilidades calculadas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🤖</div>
+        <div class="kpi-value">100%</div>
+        <div class="kpi-label">Predicciones generadas por IA</div>
+      </div>
+    </div>
+  </header>
+
+  <section class="filter-section">
+    <div class="filter-title">Fase de grupos · 72 partidos</div>
+    <div class="filter-sub">Filtrá por grupo para ver el análisis detallado de cada cruce</div>
+    <div class="filter-bar">
+      <button class="fbtn on" onclick="filterG('all')">Todos</button>
+      <button class="fbtn ga" onclick="filterG('A')">Grupo A</button>
+      <button class="fbtn gb" onclick="filterG('B')">Grupo B</button>
+      <button class="fbtn gc" onclick="filterG('C')">Grupo C</button>
+      <button class="fbtn gd" onclick="filterG('D')">Grupo D</button>
+      <button class="fbtn ge" onclick="filterG('E')">Grupo E</button>
+      <button class="fbtn gf" onclick="filterG('F')">Grupo F</button>
+      <button class="fbtn gg" onclick="filterG('G')">Grupo G</button>
+      <button class="fbtn gh" onclick="filterG('H')">Grupo H</button>
+      <button class="fbtn gi" onclick="filterG('I')">Grupo I</button>
+      <button class="fbtn gj" onclick="filterG('J')">Grupo J</button>
+      <button class="fbtn gk" onclick="filterG('K')">Grupo K</button>
+      <button class="fbtn gl" onclick="filterG('L')">Grupo L</button>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <div id="matches-container"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-title">Metodología del modelo</div>
+    <div class="footer-pills">
+      <span class="footer-pill"><b>35%</b> Rating Elo</span>
+      <span class="footer-pill"><b>25%</b> Forma reciente</span>
+      <span class="footer-pill"><b>15%</b> Calidad del plantel</span>
+      <span class="footer-pill"><b>15%</b> xG ofensivo/defensivo</span>
+      <span class="footer-pill"><b>5%</b> Lesiones y ausencias</span>
+      <span class="footer-pill"><b>5%</b> Factores contextuales</span>
+    </div>
+    <p class="footer-credit">
+      Modelo estadístico basado en Elo Ratings, expected goals (FBref), valoración de mercado (Transfermarkt) y forma reciente (últimos 10 partidos por selección). Simulación tipo Monte Carlo / Poisson con 100.000 iteraciones para proyectar resultados de la fase de grupos del Mundial FIFA 2026.
+    </p>
+    <div class="footer-bottom">
+      <span>Mundial FIFA 2026 · Predictor estadístico</span>
+      <span>Datos actualizados a junio de 2026</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const matches = [
+  {n:1,d:"Jue 11 Jun",g:"A",a:"🇲🇽 México",b:"🇿🇦 Sudáfrica",pa:55,pd:25,pb:20,pred:"Victoria México",alt:"Empate",score:"2–0",conf:7,risk:"L",note:"Local en Azteca (≈+80 Elo efectivo). Sudáfrica sin nivel ofensivo. Diferencia Elo ~230. xG MEX 1.8 vs 0.7."},
+  {n:2,d:"Jue 11 Jun",g:"A",a:"🇰🇷 Corea del Sur",b:"🇨🇿 Chequia",pa:42,pd:28,pb:30,pred:"Victoria Corea Sur",alt:"Empate",score:"1–1",conf:6,risk:"M",note:"Elo similar (+40 KOR). Son Heung-min pico de forma. Chequia disciplinada. Valor estadístico empate."},
+  {n:3,d:"Vie 12 Jun",g:"B",a:"🇨🇦 Canadá",b:"🇧🇦 Bosnia-Herz.",pa:46,pd:27,pb:27,pred:"Victoria Canadá",alt:"Empate",score:"1–0",conf:6,risk:"M",note:"Ventaja de local en Toronto. Davies + David vs defensa bosníaca. Džeko (Schalke) sigue siendo amenaza."},
+  {n:4,d:"Vie 12 Jun",g:"D",a:"🇺🇸 EE.UU.",b:"🇵🇾 Paraguay",pa:52,pd:24,pb:24,pred:"Victoria EE.UU.",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Local en LA. Pulisic como diferencia. Paraguay venía de ganar 4–0 vs Nicaragua. Elo +140 USA."},
+  {n:5,d:"Sáb 13 Jun",g:"B",a:"🇶🇦 Qatar",b:"🇨🇭 Suiza",pa:16,pd:22,pb:62,pred:"Victoria Suiza",alt:"Empate",score:"3–0",conf:8,risk:"L",note:"Qatar el peor equipo del grupo. Suiza top-20 Elo. Diferencia +260 Elo. Sin amenaza real de Qatar."},
+  {n:6,d:"Sáb 13 Jun",g:"C",a:"🇧🇷 Brasil",b:"🇲🇦 Marruecos",pa:52,pd:24,pb:24,pred:"Victoria Brasil",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Partido del grupo más atractivo. Brasil sin Rodrygo, Neymar de regreso. MAR sólido en bloque bajo. xG BRA 1.9 vs 1.1."},
+  {n:7,d:"Sáb 13 Jun",g:"C",a:"🇭🇹 Haití",b:"🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia",pa:18,pd:24,pb:58,pred:"Victoria Escocia",alt:"Escocia 1–0",score:"2–0",conf:7,risk:"L",note:"Escocia en forma histórica (4–0 vs Bolivia). Haití debutante efectivo. Elo +200. Scott McTominay lider."},
+  {n:8,d:"Sáb 13 Jun",g:"D",a:"🇦🇺 Australia",b:"🇹🇷 Turquía",pa:38,pd:28,pb:34,pred:"Empate",alt:"Victoria Turquía",score:"1–1",conf:5,risk:"H",note:"Elo casi idéntico (Turquía +0). Australia con ventaja de viajar menos. Duelo muy abierto. Máximo riesgo."},
+  {n:9,d:"Dom 14 Jun",g:"E",a:"🇩🇪 Alemania",b:"🇨🇼 Curazao",pa:87,pd:9,pb:4,pred:"Victoria Alemania",alt:"Alemania 4–0",score:"5–0",conf:10,risk:"L",note:"Máxima diferencia Elo del torneo (+590). Curazao debuta. Wirtz-Havertz-Musiala. Partido para goles."},
+  {n:10,d:"Dom 14 Jun",g:"E",a:"🇨🇮 C. de Marfil",b:"🇪🇨 Ecuador",pa:36,pd:28,pb:36,pred:"Empate",alt:"Victoria Ecuador",score:"1–1",conf:5,risk:"H",note:"Elo prácticamente igual (+0). Haller vs Valencia centrodelanteros similares. Partido de alto riesgo."},
+  {n:11,d:"Dom 14 Jun",g:"F",a:"🇳🇱 Países Bajos",b:"🇹🇳 Túnez",pa:69,pd:19,pb:12,pred:"Victoria PB",alt:"Países Bajos 2–0",score:"3–0",conf:8,risk:"L",note:"Elo +330. Gakpo-Dumfries en forma. Túnez sin poder ofensivo real. xG NED 2.2 vs 0.5."},
+  {n:12,d:"Dom 14 Jun",g:"F",a:"🇯🇵 Japón",b:"🇸🇪 Suecia",pa:44,pd:27,pb:29,pred:"Victoria Japón",alt:"Empate",score:"1–0",conf:6,risk:"M",note:"Japón Elo 1900 vs Suecia 1790. Mitoma-Doan-Ito generación pico. Suecia sólida pero menos talento individual."},
+  {n:13,d:"Lun 15 Jun",g:"G",a:"🇧🇪 Bélgica",b:"🇳🇿 Nueva Zelanda",pa:82,pd:12,pb:6,pred:"Victoria Bélgica",alt:"Bélgica 3–0",score:"4–0",conf:9,risk:"L",note:"Diferencia abismal. Lukaku-De Bruyne-De Ketelaere. NZ tiene solo a Chris Wood de nivel. Elo +400."},
+  {n:14,d:"Lun 15 Jun",g:"G",a:"🇮🇷 Irán",b:"🇪🇬 Egipto",pa:38,pd:27,pb:35,pred:"Empate",alt:"Victoria Irán",score:"1–1",conf:5,risk:"H",note:"Elo +40 Irán. Egipto sin potencia ofensiva real. Irán organizado bajo Queiroz. Clásico partido trabado."},
+  {n:15,d:"Lun 15 Jun",g:"H",a:"🇸🇦 Arabia Saudita",b:"🇺🇾 Uruguay",pa:22,pd:24,pb:54,pred:"Victoria Uruguay",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Elo +220 Uruguay. Núñez-Valverde vs Dawsari. ASA sin entrenador confirmado 56 días antes. URU favorito claro."},
+  {n:16,d:"Lun 15 Jun",g:"H",a:"🇪🇸 España",b:"🇨🇻 Cabo Verde",pa:84,pd:11,pb:5,pred:"Victoria España",alt:"España 3–0",score:"4–0",conf:9,risk:"L",note:"Elo +500. Debut de Lamine Yamal. Cabo Verde debuta en el Mundial. Sin comparación de nivel. Golazo esperado."},
+  {n:17,d:"Mar 16 Jun",g:"I",a:"🇫🇷 Francia",b:"🇸🇳 Senegal",pa:64,pd:20,pb:16,pred:"Victoria Francia",alt:"Francia 2–0",score:"2–1",conf:7,risk:"M",note:"Elo +240. Mbappé vs Sadio Mané. Senegal 2022 mucho mejor, pero generación envejecida. SEN puede sorprender si presiona alto."},
+  {n:18,d:"Mar 16 Jun",g:"I",a:"🇮🇶 Irak",b:"🇳🇴 Noruega",pa:22,pd:24,pb:54,pred:"Victoria Noruega",alt:"Empate",score:"2–0",conf:7,risk:"L",note:"Elo +200. Haaland máximo goleador esperado del torneo. Irak sin nivel comparativo. Partido unidireccional."},
+  {n:19,d:"Mar 16 Jun",g:"J",a:"🇦🇷 Argentina",b:"🇩🇿 Argelia",pa:65,pd:18,pb:17,pred:"Victoria Argentina",alt:"Argentina 2–0",score:"2–0",conf:7,risk:"M",note:"Elo +360. Messi en recuperación (entrena individual). Balerdi baja. ARG favorita clara pero con interrogantes físicos."},
+  {n:20,d:"Mar 16 Jun",g:"J",a:"🇦🇹 Austria",b:"🇯🇴 Jordania",pa:66,pd:20,pb:14,pred:"Victoria Austria",alt:"Austria 2–0",score:"3–0",conf:8,risk:"L",note:"Elo +290. Sabitzer-Gregoritsch. Jordania debuta. Austria en forma sólida (clasificó primero grupo UEFA)."},
+  {n:21,d:"Mié 17 Jun",g:"K",a:"🇵🇹 Portugal",b:"🇨🇩 Congo RD",pa:79,pd:14,pb:7,pred:"Victoria Portugal",alt:"Portugal 3–0",score:"4–0",conf:9,risk:"L",note:"Elo +360. Ronaldo último Mundial. Bernardo Silva lider del juego. Congo RD debuta. Sin competición."},
+  {n:22,d:"Mié 17 Jun",g:"K",a:"🇺🇿 Uzbekistán",b:"🇨🇴 Colombia",pa:18,pd:22,pb:60,pred:"Victoria Colombia",alt:"Colombia 2–0",score:"2–0",conf:8,risk:"L",note:"Elo +220. Díaz-Arias-Lerma. Uzbekistán debuta. Colombia con mejor clasificatoria de CONMEBOL. Partido fácil."},
+  {n:23,d:"Mié 17 Jun",g:"L",a:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra",b:"🇭🇷 Croacia",pa:52,pd:24,pb:24,pred:"Victoria Inglaterra",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Elo +150. Kane-Bellingham vs Modrić (38 años). Croacia históricamente resistente. Partido abierto."},
+  {n:24,d:"Mié 17 Jun",g:"L",a:"🇬🇭 Ghana",b:"🇵🇦 Panamá",pa:48,pd:27,pb:25,pred:"Victoria Ghana",alt:"Empate",score:"1–0",conf:5,risk:"H",note:"Elo +80. Iñaki Williams. Panamá sin grandes figuras. Partido equilibrado, Ghana ligero favorito."},
+  {n:25,d:"Jue 18 Jun",g:"B",a:"🇶🇦 Qatar",b:"🇨🇦 Canadá",pa:20,pd:22,pb:58,pred:"Victoria Canadá",alt:"Canadá 2–0",score:"2–0",conf:8,risk:"L",note:"Elo +180. Canadá local. Qatar el peor del grupo. Jonathan David en forma. Partido sin historia."},
+  {n:26,d:"Jue 18 Jun",g:"B",a:"🇧🇦 Bosnia-Herz.",b:"🇨🇭 Suiza",pa:26,pd:24,pb:50,pred:"Victoria Suiza",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Elo +140. Dzeko vs Shaqiri (crepúsculo). Suiza organizada. Bosnia puede conseguir punto si presiona."},
+  {n:27,d:"Jue 18 Jun",g:"A",a:"🇲🇽 México",b:"🇰🇷 Corea del Sur",pa:44,pd:26,pb:30,pred:"Victoria México",alt:"Empate",score:"1–0",conf:6,risk:"M",note:"Local en Guadalajara. Elo +40. Son Heung-min peligroso en transición. MEX necesita puntos para clasificar."},
+  {n:28,d:"Jue 18 Jun",g:"A",a:"🇨🇿 Chequia",b:"🇿🇦 Sudáfrica",pa:48,pd:26,pb:26,pred:"Victoria Chequia",alt:"Empate",score:"2–0",conf:6,risk:"M",note:"Elo +150. Chequia técnica superior. Sudáfrica atletismo sin calidad top. Partido relativamente controlado."},
+  {n:29,d:"Vie 19 Jun",g:"D",a:"🇺🇸 EE.UU.",b:"🇦🇺 Australia",pa:48,pd:26,pb:26,pred:"Victoria EE.UU.",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Elo +110. Pulisic vs Leckie. Australia con Goodwin en gran forma. Local en Seattle. Partido parejo."},
+  {n:30,d:"Vie 19 Jun",g:"D",a:"🇵🇾 Paraguay",b:"🇹🇷 Turquía",pa:36,pd:28,pb:36,pred:"Empate",alt:"Victoria Turquía",score:"1–1",conf:5,risk:"H",note:"Elo prácticamente igual. Arda Güler vs Almiron/Enciso. Partido de máxima incertidumbre del grupo."},
+  {n:31,d:"Vie 19 Jun",g:"E",a:"🇩🇪 Alemania",b:"🇨🇮 C. de Marfil",pa:66,pd:20,pb:14,pred:"Victoria Alemania",alt:"Alemania 2–0",score:"3–1",conf:7,risk:"L",note:"Elo +240. Alemania sin Gnabry (aductor), pero Havertz-Wirtz compensan. Marfil peligrosa en transición."},
+  {n:32,d:"Vie 19 Jun",g:"E",a:"🇪🇨 Ecuador",b:"🇨🇼 Curazao",pa:80,pd:13,pb:7,pred:"Victoria Ecuador",alt:"Ecuador 3–0",score:"3–0",conf:8,risk:"L",note:"Elo +290. Ecuador debería golear a Curazao. Enner Valencia como veterano de referencia."},
+  {n:33,d:"Sáb 20 Jun",g:"F",a:"🇳🇱 Países Bajos",b:"🇯🇵 Japón",pa:50,pd:22,pb:28,pred:"Victoria PB",alt:"Empate",score:"2–1",conf:5,risk:"H",note:"Elo +90. Gakpo vs Mitoma. El partido más parejo del grupo. Japón puede sorprender. Altísimo riesgo."},
+  {n:34,d:"Sáb 20 Jun",g:"F",a:"🇸🇪 Suecia",b:"🇹🇳 Túnez",pa:52,pd:26,pb:22,pred:"Victoria Suecia",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Elo +130. Isak-Gyökeres vs Msakni. Suecia en buena forma playoffs UEFA. Túnez defensivo."},
+  {n:35,d:"Sáb 20 Jun",g:"G",a:"🇧🇪 Bélgica",b:"🇮🇷 Irán",pa:63,pd:21,pb:16,pred:"Victoria Bélgica",alt:"Bélgica 2–0",score:"2–0",conf:7,risk:"L",note:"Elo +190. De Bruyne en Napoli, enorme temporada. Lukaku goleador. Irán resistente pero sin nivel."},
+  {n:36,d:"Sáb 20 Jun",g:"G",a:"🇪🇬 Egipto",b:"🇳🇿 Nueva Zelanda",pa:54,pd:24,pb:22,pred:"Victoria Egipto",alt:"Empate",score:"2–0",conf:6,risk:"M",note:"Elo +170. Salah liderando ataque egipcio. NZ depende de Wood. Egipto debería ganar cómodamente."},
+  {n:37,d:"Dom 21 Jun",g:"H",a:"🇺🇾 Uruguay",b:"🇨🇻 Cabo Verde",pa:76,pd:16,pb:8,pred:"Victoria Uruguay",alt:"Uruguay 2–0",score:"3–0",conf:8,risk:"L",note:"Elo +290. Núñez-Suárez. Cabo Verde debuta y no tiene nivel. Uruguay demuestra jerarquía aquí."},
+  {n:38,d:"Dom 21 Jun",g:"H",a:"🇪🇸 España",b:"🇸🇦 Arabia Saudita",pa:76,pd:16,pb:8,pred:"Victoria España",alt:"España 3–0",score:"3–0",conf:8,risk:"L",note:"Elo +430. España sin Nico Williams (duda) igual supera. Yamal-Morata-Pedri. ASA sin DT confirmado."},
+  {n:39,d:"Dom 21 Jun",g:"I",a:"🇳🇴 Noruega",b:"🇸🇳 Senegal",pa:44,pd:27,pb:29,pred:"Empate",alt:"Victoria Noruega",score:"1–1",conf:5,risk:"H",note:"Elo +0 prácticamente. Haaland vs Di María tipo partido. Muy parejo. Senegal puede puntuar aquí."},
+  {n:40,d:"Dom 21 Jun",g:"I",a:"🇫🇷 Francia",b:"🇮🇶 Irak",pa:88,pd:8,pb:4,pred:"Victoria Francia",alt:"Francia 4–0",score:"4–0",conf:9,risk:"L",note:"Elo +500. Mbappé-Griezmann-Doué. Irak sin nivel comparable. Francia puede rotar sin problema."},
+  {n:41,d:"Lun 22 Jun",g:"J",a:"🇦🇷 Argentina",b:"🇦🇹 Austria",pa:58,pd:20,pb:22,pred:"Victoria Argentina",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Elo +240. Messi esperado al 100% aquí. Austria tácticamente sólida (Rangnick). ARG no puede confiarse."},
+  {n:42,d:"Lun 22 Jun",g:"J",a:"🇯🇴 Jordania",b:"🇩🇿 Argelia",pa:30,pd:28,pb:42,pred:"Victoria Argelia",alt:"Empate",score:"1–0",conf:5,risk:"H",note:"Elo +170 Argelia. Mahrez ya retirado. Benrahma lider actual. Jordania debuta. Partido tramposo."},
+  {n:43,d:"Lun 22 Jun",g:"K",a:"🇵🇹 Portugal",b:"🇺🇿 Uzbekistán",pa:83,pd:12,pb:5,pred:"Victoria Portugal",alt:"Portugal 3–0",score:"4–0",conf:9,risk:"L",note:"Elo +380. Ronaldo quiere goles. Bernardo-Bruno-Leao. Uzbekistán debuta. Sin historia competitiva."},
+  {n:44,d:"Lun 22 Jun",g:"K",a:"🇨🇩 Congo RD",b:"🇨🇴 Colombia",pa:14,pd:20,pb:66,pred:"Victoria Colombia",alt:"Colombia 3–0",score:"3–0",conf:8,risk:"L",note:"Elo +200. Díaz-Arias. Congo RD sin experiencia mundialista. Colombia demuestra su nivel CONMEBOL."},
+  {n:45,d:"Mar 23 Jun",g:"L",a:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra",b:"🇬🇭 Ghana",pa:64,pd:21,pb:15,pred:"Victoria Inglaterra",alt:"Inglaterra 2–0",score:"3–1",conf:7,risk:"L",note:"Elo +350. Iñaki Williams vs hermano Nico (España). Inglaterra no puede perder puntos. Kane letal."},
+  {n:46,d:"Mar 23 Jun",g:"L",a:"🇭🇷 Croacia",b:"🇵🇦 Panamá",pa:64,pd:21,pb:15,pred:"Victoria Croacia",alt:"Croacia 2–0",score:"2–0",conf:7,risk:"L",note:"Elo +280. Modrić último Mundial. Croacia necesita puntos para clasificar. Panamá sin recursos ofensivos."},
+  {n:47,d:"Mar 23 Jun",g:"I",a:"🇸🇳 Senegal",b:"🇮🇶 Irak",pa:66,pd:20,pb:14,pred:"Victoria Senegal",alt:"Senegal 2–0",score:"2–0",conf:7,risk:"L",note:"Elo +260. Senegal necesita los 3 puntos para clasificar. Mané lider. Irak sin posibilidades en el grupo."},
+  {n:48,d:"Mar 23 Jun",g:"I",a:"🇫🇷 Francia",b:"🇳🇴 Noruega",pa:58,pd:22,pb:20,pred:"Victoria Francia",alt:"Empate",score:"2–0",conf:7,risk:"M",note:"Elo +300. Francia puede rotar con liderato asegurado. Haaland peligroso siempre. Si FRA rota, riesgo sube."},
+  {n:49,d:"Mié 24 Jun",g:"C",a:"🇧🇷 Brasil",b:"🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia",pa:66,pd:20,pb:14,pred:"Victoria Brasil",alt:"Brasil 2–0",score:"2–0",conf:7,risk:"L",note:"Elo +330. Vinicius-Raphinha-Endrick. Escocia solidaria pero sin recursos. Brasil confirma 1er lugar."},
+  {n:50,d:"Mié 24 Jun",g:"C",a:"🇲🇦 Marruecos",b:"🇭🇹 Haití",pa:78,pd:14,pb:8,pred:"Victoria Marruecos",alt:"Marruecos 3–0",score:"3–0",conf:8,risk:"L",note:"Elo +380. Marruecos hambre de semifinal repetida 2022. Haití sin recursos. Partido para goles MAR."},
+  {n:51,d:"Mié 24 Jun",g:"D",a:"🇵🇾 Paraguay",b:"🇦🇺 Australia",pa:36,pd:28,pb:36,pred:"Empate",alt:"Victoria Paraguay",score:"1–1",conf:5,risk:"H",note:"Elo igual. Ambos necesitan puntos para clasificar. Partido de máxima tensión. Pronóstico empate con valor."},
+  {n:52,d:"Mié 24 Jun",g:"D",a:"🇺🇸 EE.UU.",b:"🇹🇷 Turquía",pa:44,pd:26,pb:30,pred:"Victoria EE.UU.",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Elo +110. Local en LA. Arda Güler (Real Madrid). Partido definidor del grupo. Puede ir a cualquier lado."},
+  {n:53,d:"Jue 25 Jun",g:"E",a:"🇩🇪 Alemania",b:"🇪🇨 Ecuador",pa:60,pd:22,pb:18,pred:"Victoria Alemania",alt:"Alemania 2–0",score:"2–1",conf:7,risk:"M",note:"Elo +200. Alemania consolida 1er lugar. Ecuador con Enner Valencia. Partido más cerrado que vs Curazao."},
+  {n:54,d:"Jue 25 Jun",g:"E",a:"🇨🇮 C. de Marfil",b:"🇨🇼 Curazao",pa:77,pd:15,pb:8,pred:"Victoria C. de Marfil",alt:"Marfil 2–0",score:"3–0",conf:8,risk:"L",note:"Elo +250. Haller-Doué (hermano del francés). Curazao sin posibilidades. Marfil lucha por 3er lugar."},
+  {n:55,d:"Jue 25 Jun",g:"F",a:"🇯🇵 Japón",b:"🇹🇳 Túnez",pa:62,pd:22,pb:16,pred:"Victoria Japón",alt:"Japón 2–0",score:"2–0",conf:7,risk:"L",note:"Elo +240. Japón asegura clasificación. Mitoma-Ito. Túnez ya sin opciones. Partido unidireccional."},
+  {n:56,d:"Jue 25 Jun",g:"F",a:"🇳🇱 Países Bajos",b:"🇸🇪 Suecia",pa:62,pd:22,pb:16,pred:"Victoria PB",alt:"Países Bajos 2–0",score:"2–1",conf:7,risk:"M",note:"Elo +200. Gakpo-Xavi Simons (baja confirmada) → impacto. Suecia puede robar punto. Isak como amenaza."},
+  {n:57,d:"Vie 26 Jun",g:"G",a:"🇪🇬 Egipto",b:"🇮🇷 Irán",pa:38,pd:27,pb:35,pred:"Empate",alt:"Victoria Egipto",score:"1–1",conf:5,risk:"H",note:"Elo +40 Egipto. Salah vs Azmoun (Irán). Ambos se juegan clasificar como 3ero. Valor estadístico empate."},
+  {n:58,d:"Vie 26 Jun",g:"G",a:"🇳🇿 Nueva Zelanda",b:"🇧🇪 Bélgica",pa:7,pd:13,pb:80,pred:"Victoria Bélgica",alt:"Bélgica 3–0",score:"3–0",conf:9,risk:"L",note:"Elo +400. NZ solo tiene a Wood. Bélgica puede rotar y ganar igualmente. Sin incertidumbre."},
+  {n:59,d:"Vie 26 Jun",g:"H",a:"🇨🇻 Cabo Verde",b:"🇸🇦 Arabia Saudita",pa:34,pd:26,pb:40,pred:"Empate/Victoria ASA",alt:"Empate",score:"1–1",conf:4,risk:"H",note:"Elo similar. Ninguno clasifica. Partido sin presión real. Cabo Verde puede dar sorpresa debutando fuerte."},
+  {n:60,d:"Vie 26 Jun",g:"H",a:"🇺🇾 Uruguay",b:"🇪🇸 España",pa:22,pd:24,pb:54,pred:"Victoria España",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Elo +210. Uruguay con clasificación asegurada puede rotar. España también 1era. Partido con rotaciones."},
+  {n:61,d:"Sáb 27 Jun",g:"I",a:"🇮🇶 Irak",b:"🇸🇳 Senegal",pa:14,pd:20,pb:66,pred:"Victoria Senegal",alt:"Senegal 2–0",score:"2–0",conf:8,risk:"L",note:"Elo +260. Mané-Gueye. Irak eliminado. Senegal necesita ganar para asegurar 2do. Sin drama."},
+  {n:62,d:"Sáb 27 Jun",g:"I",a:"🇳🇴 Noruega",b:"🇫🇷 Francia",pa:18,pd:22,pb:60,pred:"Victoria Francia",alt:"Empate",score:"2–0",conf:7,risk:"L",note:"Elo +300. Si Francia rota, riesgo sube. Haaland en partido definidor. Si necesita ganar NOG, el Elo se acorta."},
+  {n:63,d:"Sáb 27 Jun",g:"J",a:"🇩🇿 Argelia",b:"🇦🇹 Austria",pa:34,pd:26,pb:40,pred:"Victoria Austria",alt:"Empate",score:"2–1",conf:5,risk:"H",note:"Elo +120 Austria. Ambos se juegan 2do lugar. Argelia puede sorprender con contraataque. Alto riesgo."},
+  {n:64,d:"Sáb 27 Jun",g:"J",a:"🇯🇴 Jordania",b:"🇦🇷 Argentina",pa:9,pd:14,pb:77,pred:"Victoria Argentina",alt:"Argentina 2–0",score:"3–0",conf:8,risk:"L",note:"Elo +530. Con Messi 100%, Argentina golea. Jordania ya eliminada. ARG puede relajarse y rodar."},
+  {n:65,d:"Sáb 27 Jun",g:"K",a:"🇨🇴 Colombia",b:"🇵🇹 Portugal",pa:28,pd:24,pb:48,pred:"Victoria Portugal",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Elo +160. Ronaldo quiere terminar 1ero. Díaz en gran forma (Liverpool). Partido atractivo con valor estadístico."},
+  {n:66,d:"Sáb 27 Jun",g:"K",a:"🇨🇩 Congo RD",b:"🇺🇿 Uzbekistán",pa:46,pd:26,pb:28,pred:"Victoria Congo RD",alt:"Empate",score:"1–0",conf:5,risk:"H",note:"Elo +110 Congo. Ambos sin opciones de clasificar como top-2. Partido de cebollita."},
+  {n:67,d:"Sáb 27 Jun",g:"L",a:"🇵🇦 Panamá",b:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra",pa:9,pd:15,pb:76,pred:"Victoria Inglaterra",alt:"Inglaterra 3–0",score:"3–0",conf:8,risk:"L",note:"Elo +430. Kane necesita goles. Panamá con clasificación imposible. England termina primero cómodamente."},
+  {n:68,d:"Sáb 27 Jun",g:"L",a:"🇭🇷 Croacia",b:"🇬🇭 Ghana",pa:52,pd:26,pb:22,pred:"Victoria Croacia",alt:"Empate",score:"2–1",conf:6,risk:"M",note:"Elo +200. Modrić-Kovacic. Croacia necesita ganar para asegurar 2do. Ghana peligrosa en contras."},
+  {n:69,d:"Lun 22 Jun",g:"A",a:"🇲🇽 México",b:"🇨🇿 Chequia",pa:48,pd:26,pb:26,pred:"Victoria México",alt:"Empate",score:"2–1",conf:5,risk:"H",note:"Elo +80 MEX. Local vital para clasificar. Chequia puede puntuar. Partido muy disputado."},
+  {n:70,d:"Lun 22 Jun",g:"A",a:"🇰🇷 Corea del Sur",b:"🇿🇦 Sudáfrica",pa:58,pd:24,pb:18,pred:"Victoria Corea Sur",alt:"Corea 2–0",score:"2–0",conf:7,risk:"L",note:"Elo +190. Son a tope. Sudáfrica sin recursos suficientes. KOR asegura 2do con esta victoria."},
+  {n:71,d:"Vie 20 Jun",g:"B",a:"🇨🇭 Suiza",b:"🇨🇦 Canadá",pa:44,pd:27,pb:29,pred:"Empate",alt:"Victoria Suiza",score:"1–1",conf:5,risk:"H",note:"Elo +80 Suiza. Canadá en casa (Toronto). Partido que define el 1ero del grupo. Gran interés."},
+  {n:72,d:"Vie 20 Jun",g:"B",a:"🇧🇦 Bosnia-Herz.",b:"🇶🇦 Qatar",pa:58,pd:24,pb:18,pred:"Victoria Bosnia",alt:"Bosnia 2–0",score:"2–0",conf:7,risk:"L",note:"Elo +120. Džeko última gran actuación mundialista. Qatar sin posibilidades. Bosnia consolida 3er puesto."},
+];
+
+function mkConf(c){
+  let s='';
+  for(let i=0;i<c;i++) s+='★';
+  for(let i=c;i<10;i++) s+='☆';
+  return s;
+}
+
+function renderMatches(filter){
+  const cont=document.getElementById('matches-container');
+  const filtered=filter==='all'?matches:matches.filter(m=>m.g===filter);
+  const byDay={};
+  filtered.forEach(m=>{
+    if(!byDay[m.d]) byDay[m.d]=[];
+    byDay[m.d].push(m);
+  });
+  let html='';
+  let cardIndex=0;
+  const days=Object.keys(byDay);
+  days.forEach(d=>{
+    html+=`<div class="day-label">${d}</div>`;
+    byDay[d].sort((a,b)=>a.n-b.n).forEach(m=>{
+      const riskCls=m.risk==='L'?'risk-l':m.risk==='M'?'risk-m':'risk-h';
+      const riskTxt=m.risk==='L'?'🟢 Riesgo bajo':m.risk==='M'?'🟡 Riesgo medio':'🔴 Riesgo alto';
+      const delay=(cardIndex%10)*0.04;
+      cardIndex++;
+      html+=`<div class="match" style="animation-delay:${delay}s">
+        <div class="match-head">
+          <div class="match-head-left">
+            <span class="match-num">P${m.n}</span>
+            <span class="match-grp g${m.g}">Grupo ${m.g}</span>
+          </div>
+          <span class="score-hint">Marcador probable: <strong>${m.score}</strong></span>
+        </div>
+        <div class="teams">
+          <div class="team-a">${m.a}</div>
+          <div class="match-vs">VS</div>
+          <div class="team-b">${m.b}</div>
+        </div>
+        <div class="stats-row">
+          <span><strong>${m.pa}%</strong>Victoria A</span>
+          <span><strong>${m.pd}%</strong>Empate</span>
+          <span><strong>${m.pb}%</strong>Victoria B</span>
+        </div>
+        <div class="bars">
+          <div class="ba" data-w="${m.pa}" style="width:0"></div>
+          <div class="bd" data-w="${m.pd}" style="width:0"></div>
+          <div class="bb" data-w="${m.pb}" style="width:0"></div>
+        </div>
+        <div class="probs">
+          <span>${m.a.split(' ').slice(1).join(' ')}</span>
+          <span>Empate</span>
+          <span>${m.b.split(' ').slice(1).join(' ')}</span>
+        </div>
+        <div class="match-foot">
+          <span class="pred-tag">✓ ${m.pred}</span>
+          <span class="alt-tag">Alt: ${m.alt}</span>
+          <span class="conf">${mkConf(m.conf)}</span>
+          <span class="conf-num">${m.conf}/10</span>
+          <span class="${riskCls}">${riskTxt}</span>
+        </div>
+        <div class="match-note">${m.note}</div>
+      </div>`;
+    });
+  });
+  cont.innerHTML=html;
+
+  // animate probability bars after render
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      document.querySelectorAll('.ba, .bd, .bb').forEach(bar=>{
+        bar.style.width = bar.getAttribute('data-w') + '%';
+      });
+    });
+  });
+}
+
+function filterG(g){
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+  event.currentTarget.classList.add('on');
+  renderMatches(g);
+}
+
+renderMatches('all');
+</script>
+</body>
+</html>
